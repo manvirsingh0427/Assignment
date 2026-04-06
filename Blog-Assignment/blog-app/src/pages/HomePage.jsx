@@ -18,7 +18,7 @@ const HomePage = () => {
       <div className="mb-6 flex justify-end">
         <Link
           to="/posts/new"
-          className="inline-flex items-center justify-center rounded-lg bg-sky-200 px-5 py-3 text-sm font-semibold text-sky-900 transition hover:bg-sky-300"
+          className="inline-flex items-center justify-center rounded-lg bg-blue-500 px-5 py-3 text-sm font-semibold !text-white transition hover:bg-blue-600 hover:!text-white"
         >
           New Post
         </Link>
