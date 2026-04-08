@@ -64,6 +64,10 @@ const PostFormPage = () => {
 
     if (!formData.title.trim()) {
       nextErrors.title = 'Title is required.'
+    } else if (formData.title.trim().length < 3) {
+      nextErrors.title = 'Title must be at least 3 characters.'
+    } else if (formData.title.trim().length > 100) {
+      nextErrors.title = 'Title cannot exceed 100 characters.'
     }
 
     if (!formData.categories.trim()) {
@@ -72,6 +76,10 @@ const PostFormPage = () => {
 
     if (!formData.content.trim()) {
       nextErrors.content = 'Content is required.'
+    } else if (formData.content.trim().length < 10) {
+      nextErrors.content = 'Content must be at least 10 characters.'
+    } else if (formData.content.trim().length > 5000) {
+      nextErrors.content = 'Content cannot exceed 5000 characters.'
     }
 
     setErrors(nextErrors)
@@ -98,9 +106,9 @@ const PostFormPage = () => {
       return
     }
 
-    const action = dispatch(addPost(formData))
+    dispatch(addPost(formData))
     showMessage('New blog post added.', 'success')
-    navigate(`/posts/${action.payload.id}`)
+    navigate('/')
   }
 
   return (
@@ -108,7 +116,7 @@ const PostFormPage = () => {
       <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <button
           type="button"
-          onClick={() => navigate(-1)}
+          onClick={() => navigate('/')}
           className="inline-flex items-center justify-center rounded-lg border border-slate-300 bg-white px-5 py-3 text-sm font-semibold text-slate-700 shadow-sm transition hover:border-slate-400 hover:text-slate-950"
         >
           ← Back
