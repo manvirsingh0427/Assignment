@@ -1,0 +1,5 @@
+$rg='manvirsingh'
+$acr='blogappacr39368'
+$app='blog-app-3221178-39368'
+$plan='asp-blog-app-39368'
+$loc='centralindia'
