@@ -59,7 +59,7 @@ const PostDetailsPage = () => {
           onClick={() => navigate(-1)}
           className="inline-flex items-center justify-center rounded-lg border border-slate-300 bg-white px-5 py-3 text-sm font-semibold text-slate-700 shadow-sm transition hover:border-slate-400 hover:text-slate-950"
         >
-          ← Back
+          Back To Home Page
         </button>
 
         <div className="flex flex-wrap gap-3 sm:justify-end">
