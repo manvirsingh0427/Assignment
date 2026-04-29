@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>FilterOption.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">module3</a> &gt; <a href="index.source.html" class="el_package">com.module3.model</a> &gt; <span class="el_source">FilterOption.java</span></div><h1>FilterOption.java</h1><pre class="source lang-java linenums">package com.module3.model;
+
+/**
+ * Enum representing filter options for product search in the application.
+ * Each option has a menu number
+ */
+<span class="fc" id="L7">public enum FilterOption {</span>
+<span class="fc" id="L8">    COLOR(1),</span>
+<span class="fc" id="L9">    SIZE(2),</span>
+<span class="fc" id="L10">    COLOR_AND_SIZE(3),</span>
+<span class="fc" id="L11">    BRAND_AND_COLOR(4),</span>
+<span class="fc" id="L12">    BRAND_AND_SIZE(5);</span>
+
+    private final int menuOption;
+
+    /**
+     * Constructs a FilterOption enum value.
+     * @param menuOption Menu number for selection
+     */
+<span class="fc" id="L20">    FilterOption(int menuOption) {</span>
+<span class="fc" id="L21">        this.menuOption = menuOption;</span>
+<span class="fc" id="L22">    }</span>
+
+    /**
+     * Returns the FilterOption corresponding to the given menu value.
+     * @param value Menu value as string
+     * @return FilterOption enum value
+     * @throws IllegalArgumentException if value is invalid
+     */
+    public static FilterOption fromMenuValue(String value) {
+<span class="nc bnc" id="L31" title="All 4 branches missed.">        if (value == null || value.trim().isEmpty()) {</span>
+<span class="nc" id="L32">            throw new IllegalArgumentException(&quot;Please choose a valid menu option.&quot;);</span>
+        }
+
+        try {
+<span class="nc" id="L36">            int selected = Integer.parseInt(value.trim());</span>
+<span class="nc bnc" id="L37" title="All 2 branches missed.">            for (FilterOption option : values()) {</span>
+<span class="nc bnc" id="L38" title="All 2 branches missed.">                if (option.menuOption == selected) {</span>
+<span class="nc" id="L39">                    return option;</span>
+                }
+            }
+<span class="nc" id="L42">        } catch (NumberFormatException ex) {</span>
+<span class="nc" id="L43">            throw new IllegalArgumentException(&quot;Menu option must be a number between 1 and 5.&quot;);</span>
+<span class="nc" id="L44">        }</span>
+
+<span class="nc" id="L46">        throw new IllegalArgumentException(&quot;Please choose a valid menu option between 1 and 5.&quot;);</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

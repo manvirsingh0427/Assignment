@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>CsvReaderFactory.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">module3</a> &gt; <a href="index.source.html" class="el_package">com.module3.io</a> &gt; <span class="el_source">CsvReaderFactory.java</span></div><h1>CsvReaderFactory.java</h1><pre class="source lang-java linenums">package com.module3.io;
+
+import com.module3.model.Brand;
+import com.module3.validation.ProductValidator;
+
+import java.util.EnumMap;
+import java.util.Map;
+import java.util.function.Consumer;
+
+/**
+ * Factory for creating BrandCsvReader instances for different brands.
+ * Provides a reader for each supported brand.
+ */
+public class CsvReaderFactory {
+    private final Map&lt;Brand, BrandCsvReader&gt; readers;
+
+    /**
+     * Constructs a CsvReaderFactory with a validator and error logger.
+     * @param validator ProductValidator for validating products
+     * @param errorLogger Consumer for error messages
+     */
+<span class="fc" id="L22">    public CsvReaderFactory(ProductValidator validator, Consumer&lt;String&gt; errorLogger) {</span>
+<span class="fc" id="L23">        Map&lt;Brand, BrandCsvReader&gt; readerMap = new EnumMap&lt;&gt;(Brand.class);</span>
+<span class="fc" id="L24">        readerMap.put(Brand.PUMA, new PumaCsvReader(validator, errorLogger));</span>
+<span class="fc" id="L25">        readerMap.put(Brand.NIKE, new NikeCsvReader(validator, errorLogger));</span>
+<span class="fc" id="L26">        this.readers = readerMap;</span>
+<span class="fc" id="L27">    }</span>
+
+    /**
+     * Returns the BrandCsvReader for the given brand.
+     * @param brand Brand to get reader for
+     * @return BrandCsvReader instance
+     * @throws IllegalArgumentException if no reader is configured for the brand
+     */
+    public BrandCsvReader getReader(Brand brand) {
+<span class="fc" id="L36">        BrandCsvReader reader = readers.get(brand);</span>
+<span class="pc bpc" id="L37" title="1 of 2 branches missed.">        if (reader == null) {</span>
+<span class="nc" id="L38">            throw new IllegalArgumentException(&quot;No CSV reader configured for brand: &quot; + brand);</span>
+        }
+<span class="fc" id="L40">        return reader;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

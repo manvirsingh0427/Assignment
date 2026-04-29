@@ -1,0 +1,16 @@
+GROUP,PACKAGE,CLASS,INSTRUCTION_MISSED,INSTRUCTION_COVERED,BRANCH_MISSED,BRANCH_COVERED,LINE_MISSED,LINE_COVERED,COMPLEXITY_MISSED,COMPLEXITY_COVERED,METHOD_MISSED,METHOD_COVERED
+module3,default,ApplicationLauncher,93,0,8,0,14,0,6,0,2,0
+module3,default,Main,6,0,0,0,3,0,2,0,2,0
+module3,com.module3.cli,ConsoleApplication,208,0,12,0,50,0,13,0,5,0
+module3,com.module3.validation,ProductValidator,32,172,6,8,7,34,6,11,0,10
+module3,com.module3.model,FilterOption,49,46,8,0,10,9,5,2,1,2
+module3,com.module3.model,Brand,5,26,2,2,1,5,2,2,0,2
+module3,com.module3.model,ProductType,5,26,2,2,1,5,2,2,0,2
+module3,com.module3.model,Product,42,101,8,4,7,25,6,12,2,10
+module3,com.module3.store,ProductRepository,2,257,2,6,1,53,2,21,0,19
+module3,com.module3.service,ProductService,33,85,3,5,6,22,4,7,1,4
+module3,com.module3.service,FilePollingService,107,225,4,6,23,47,10,13,7,11
+module3,com.module3.io,CsvReaderFactory,7,39,1,1,1,9,1,2,0,2
+module3,com.module3.io,PumaCsvReader,2,30,1,3,1,6,2,4,1,3
+module3,com.module3.io,AbstractCsvReader,1,85,2,6,1,18,2,6,0,4
+module3,com.module3.io,NikeCsvReader,2,30,1,3,1,6,2,4,1,3

@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ApplicationLauncher.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">module3</a> &gt; <a href="index.source.html" class="el_package">default</a> &gt; <span class="el_source">ApplicationLauncher.java</span></div><h1>ApplicationLauncher.java</h1><pre class="source lang-java linenums">import com.module3.cli.ConsoleApplication;
+import com.module3.io.CsvReaderFactory;
+import com.module3.service.FilePollingService;
+import com.module3.service.ProductService;
+import com.module3.store.ProductRepository;
+import com.module3.validation.ProductValidator;
+
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.Scanner;
+
+public final class ApplicationLauncher {
+    private ApplicationLauncher() {
+    }
+
+    public static void launch(String[] args) {
+<span class="nc" id="L17">        ProductValidator validator = new ProductValidator();</span>
+<span class="nc" id="L18">        ProductRepository repository = ProductRepository.getInstance();</span>
+<span class="nc" id="L19">        CsvReaderFactory readerFactory = new CsvReaderFactory(validator, System.err::println);</span>
+
+<span class="nc" id="L21">        Path inputDirectory = resolveInputDirectory(args);</span>
+<span class="nc" id="L22">        FilePollingService filePollingService = new FilePollingService(</span>
+                inputDirectory,
+                repository,
+                readerFactory,
+<span class="nc" id="L26">                System.out::println</span>
+        );
+
+<span class="nc" id="L29">        ProductService productService = new ProductService(repository, validator);</span>
+<span class="nc" id="L30">        ConsoleApplication consoleApplication = new ConsoleApplication(</span>
+                productService,
+                filePollingService,
+                new Scanner(System.in),
+                System.out
+        );
+
+<span class="nc" id="L37">        Runtime.getRuntime().addShutdownHook(new Thread(filePollingService::stop));</span>
+<span class="nc" id="L38">        consoleApplication.start();</span>
+<span class="nc" id="L39">    }</span>
+
+    private static Path resolveInputDirectory(String[] args) {
+<span class="nc bnc" id="L42" title="All 8 branches missed.">        if (args != null &amp;&amp; args.length &gt; 0 &amp;&amp; args[0] != null &amp;&amp; !args[0].trim().isEmpty()) {</span>
+<span class="nc" id="L43">            return Paths.get(args[0].trim()).toAbsolutePath().normalize();</span>
+        }
+<span class="nc" id="L45">        return Paths.get(&quot;input&quot;).toAbsolutePath().normalize();</span>
+    }
+}
+
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

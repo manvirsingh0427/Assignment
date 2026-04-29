@@ -1,0 +1,6 @@
+com\module3\service\FilePollingServiceTest.class
+com\module3\service\ProductServiceTest.class
+com\module3\store\ProductRepositoryTest.class
+com\module3\io\NikeCsvReaderTest.class
+com\module3\validation\ProductValidatorTest.class
+com\module3\io\PumaCsvReaderTest.class

@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>AbstractCsvReader.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">module3</a> &gt; <a href="index.source.html" class="el_package">com.module3.io</a> &gt; <span class="el_source">AbstractCsvReader.java</span></div><h1>AbstractCsvReader.java</h1><pre class="source lang-java linenums">package com.module3.io;
+
+import com.module3.model.Product;
+
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.function.Consumer;
+
+/**
+ * Abstract base class for reading CSV files for a specific brand.
+ * Implements common logic for reading lines and parsing products.
+ * Subclasses must implement the parse method for brand-specific parsing.
+ */
+public abstract class AbstractCsvReader implements BrandCsvReader {
+    private final Consumer&lt;String&gt; errorLogger;
+
+    /**
+     * Constructs an AbstractCsvReader with an error logger.
+     * @param errorLogger Consumer for error messages
+     */
+<span class="fc" id="L24">    protected AbstractCsvReader(Consumer&lt;String&gt; errorLogger) {</span>
+<span class="fc" id="L25">        this.errorLogger = errorLogger;</span>
+<span class="fc" id="L26">    }</span>
+
+    /**
+     * Reads products from a CSV file at the given path.
+     * Skips header and invalid lines, logs errors.
+     * @param filePath Path to the CSV file
+     * @return List of parsed Product objects
+     * @throws IOException if file cannot be read
+     */
+    @Override
+    public List&lt;Product&gt; readProducts(Path filePath) throws IOException {
+<span class="fc" id="L37">        List&lt;String&gt; lines = Files.readAllLines(filePath);</span>
+<span class="fc" id="L38">        List&lt;Product&gt; products = new ArrayList&lt;&gt;();</span>
+
+<span class="fc bfc" id="L40" title="All 2 branches covered.">        for (int index = 0; index &lt; lines.size(); index++) {</span>
+<span class="fc" id="L41">            String line = lines.get(index);</span>
+<span class="pc bpc" id="L42" title="2 of 4 branches missed.">            if (line == null || line.trim().isEmpty()) {</span>
+<span class="nc" id="L43">                continue;</span>
+            }
+<span class="fc bfc" id="L45" title="All 2 branches covered.">            if (isHeader(line)) {</span>
+<span class="fc" id="L46">                continue;</span>
+            }
+
+<span class="fc" id="L49">            String[] columns = splitCsvLine(line);</span>
+            try {
+<span class="fc" id="L51">                products.add(parse(columns));</span>
+<span class="fc" id="L52">            } catch (IllegalArgumentException ex) {</span>
+<span class="fc" id="L53">                errorLogger.accept(String.format(&quot;Skipping invalid line %d in %s: %s&quot;, index + 1, filePath.getFileName(), ex.getMessage()));</span>
+<span class="fc" id="L54">            }</span>
+        }
+
+<span class="fc" id="L57">        return products;</span>
+    }
+
+    /**
+     * Checks if a line is a CSV header.
+     * @param line Line to check
+     * @return true if header, false otherwise
+     */
+    private boolean isHeader(String line) {
+<span class="fc" id="L66">        return line.trim().toUpperCase().startsWith(&quot;ID,&quot;);</span>
+    }
+
+    /**
+     * Splits a CSV line into columns, trimming whitespace.
+     * @param line CSV line
+     * @return Array of column values
+     */
+    protected String[] splitCsvLine(String line) {
+<span class="fc" id="L75">        return line.split(&quot;\\s*,\\s*&quot;);</span>
+    }
+
+    /**
+     * Parses columns into a Product. Must be implemented by subclasses.
+     * @param columns Array of column values
+     * @return Product object
+     */
+    protected abstract Product parse(String[] columns);
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

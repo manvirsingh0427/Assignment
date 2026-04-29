@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>FilePollingService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">module3</a> &gt; <a href="index.source.html" class="el_package">com.module3.service</a> &gt; <span class="el_source">FilePollingService.java</span></div><h1>FilePollingService.java</h1><pre class="source lang-java linenums">package com.module3.service;
+
+import com.module3.io.BrandCsvReader;
+import com.module3.io.CsvReaderFactory;
+import com.module3.model.Brand;
+import com.module3.model.Product;
+import com.module3.store.ProductRepository;
+
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.EnumMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+public class FilePollingService {
+    private final Path inputDirectory;
+    private final ProductRepository repository;
+<span class="fc" id="L30">    private final Map&lt;Brand, BrandCsvReader&gt; readers = new EnumMap&lt;&gt;(Brand.class);</span>
+<span class="fc" id="L31">    private final Map&lt;Brand, Set&lt;Path&gt;&gt; processedFiles = new EnumMap&lt;&gt;(Brand.class);</span>
+    private final Consumer&lt;String&gt; logger;
+    private final ScheduledExecutorService executorService;
+    private volatile boolean started;
+
+    public FilePollingService(Path inputDirectory,
+                              ProductRepository repository,
+                              CsvReaderFactory readerFactory,
+                              Consumer&lt;String&gt; logger) {
+<span class="nc" id="L40">        this(inputDirectory, repository, readerFactory, logger, Executors.newScheduledThreadPool(2));</span>
+<span class="nc" id="L41">    }</span>
+
+    public FilePollingService(Path inputDirectory,
+                              ProductRepository repository,
+                              CsvReaderFactory readerFactory,
+                              Consumer&lt;String&gt; logger,
+<span class="fc" id="L47">                              ScheduledExecutorService executorService) {</span>
+<span class="fc" id="L48">        this.inputDirectory = inputDirectory;</span>
+<span class="fc" id="L49">        this.repository = repository;</span>
+<span class="fc" id="L50">        this.logger = logger;</span>
+<span class="fc" id="L51">        this.executorService = executorService;</span>
+<span class="fc" id="L52">        this.readers.put(Brand.PUMA, readerFactory.getReader(Brand.PUMA));</span>
+<span class="fc" id="L53">        this.readers.put(Brand.NIKE, readerFactory.getReader(Brand.NIKE));</span>
+<span class="fc" id="L54">        this.processedFiles.put(Brand.PUMA, java.util.concurrent.ConcurrentHashMap.newKeySet());</span>
+<span class="fc" id="L55">        this.processedFiles.put(Brand.NIKE, java.util.concurrent.ConcurrentHashMap.newKeySet());</span>
+<span class="fc" id="L56">    }</span>
+
+    public synchronized void start() {
+<span class="nc bnc" id="L59" title="All 2 branches missed.">        if (started) {</span>
+<span class="nc" id="L60">            return;</span>
+        }
+
+<span class="nc" id="L63">        ensureInputDirectoryExists();</span>
+<span class="nc" id="L64">        started = true;</span>
+
+<span class="nc" id="L66">        Future&lt;?&gt; pumaStartup = executorService.submit(() -&gt; safelyProcessBrand(Brand.PUMA));</span>
+<span class="nc" id="L67">        Future&lt;?&gt; nikeStartup = executorService.submit(() -&gt; safelyProcessBrand(Brand.NIKE));</span>
+<span class="nc" id="L68">        waitForInitialLoad(pumaStartup, nikeStartup);</span>
+<span class="nc" id="L69">        executorService.scheduleAtFixedRate(() -&gt; safelyProcessBrand(Brand.PUMA), 30, 30, TimeUnit.SECONDS);</span>
+<span class="nc" id="L70">        executorService.scheduleAtFixedRate(() -&gt; safelyProcessBrand(Brand.NIKE), 30, 30, TimeUnit.SECONDS);</span>
+<span class="nc" id="L71">    }</span>
+
+    public synchronized void stop() {
+<span class="fc" id="L74">        started = false;</span>
+<span class="fc" id="L75">        executorService.shutdownNow();</span>
+<span class="fc" id="L76">    }</span>
+
+    public void scanAllNow() {
+<span class="fc" id="L79">        ensureInputDirectoryExists();</span>
+<span class="fc" id="L80">        safelyProcessBrand(Brand.PUMA);</span>
+<span class="fc" id="L81">        safelyProcessBrand(Brand.NIKE);</span>
+<span class="fc" id="L82">    }</span>
+
+    public void scanBrandNow(Brand brand) {
+<span class="fc" id="L85">        ensureInputDirectoryExists();</span>
+<span class="fc" id="L86">        safelyProcessBrand(brand);</span>
+<span class="fc" id="L87">    }</span>
+
+    private void safelyProcessBrand(Brand brand) {
+        try {
+<span class="fc" id="L91">            int addedCount = processNewFiles(brand);</span>
+<span class="pc bpc" id="L92" title="1 of 2 branches missed.">            if (addedCount &gt; 0) {</span>
+<span class="fc" id="L93">                logger.accept(String.format(&quot;Loaded %d new %s record(s). Total records in memory: %d&quot;, addedCount, brand.name(), repository.count()));</span>
+            }
+<span class="nc" id="L95">        } catch (Exception ex) {</span>
+<span class="nc" id="L96">            logger.accept(&quot;Failed to process files for brand &quot; + brand.name() + &quot;: &quot; + ex.getMessage());</span>
+<span class="fc" id="L97">        }</span>
+<span class="fc" id="L98">    }</span>
+
+    private int processNewFiles(Brand brand) throws IOException {
+<span class="fc" id="L101">        BrandCsvReader reader = readers.get(brand);</span>
+<span class="fc" id="L102">        List&lt;Path&gt; pendingFiles = listMatchingFiles(reader).stream()</span>
+<span class="fc bfc" id="L103" title="All 2 branches covered.">                .filter(path -&gt; !processedFiles.get(brand).contains(path.toAbsolutePath().normalize()))</span>
+<span class="fc" id="L104">                .collect(Collectors.toList());</span>
+
+<span class="fc" id="L106">        int totalAdded = 0;</span>
+<span class="fc bfc" id="L107" title="All 2 branches covered.">        for (Path filePath : pendingFiles) {</span>
+<span class="fc" id="L108">            List&lt;Product&gt; products = reader.readProducts(filePath);</span>
+<span class="fc" id="L109">            totalAdded += repository.addProducts(products);</span>
+<span class="fc" id="L110">            processedFiles.get(brand).add(filePath.toAbsolutePath().normalize());</span>
+<span class="fc" id="L111">        }</span>
+<span class="fc" id="L112">        return totalAdded;</span>
+    }
+
+    private List&lt;Path&gt; listMatchingFiles(BrandCsvReader reader) throws IOException {
+<span class="pc bpc" id="L116" title="1 of 2 branches missed.">        if (!Files.exists(inputDirectory)) {</span>
+<span class="nc" id="L117">            return new ArrayList&lt;&gt;();</span>
+        }
+
+<span class="fc" id="L120">        try (Stream&lt;Path&gt; stream = Files.list(inputDirectory)) {</span>
+<span class="fc" id="L121">            return stream.filter(Files::isRegularFile)</span>
+<span class="fc" id="L122">                    .filter(reader::supports)</span>
+<span class="fc" id="L123">                    .sorted(Comparator.comparing(path -&gt; path.getFileName().toString().toLowerCase(Locale.ROOT)))</span>
+<span class="fc" id="L124">                    .collect(Collectors.toList());</span>
+        }
+    }
+
+    private void ensureInputDirectoryExists() {
+        try {
+<span class="fc" id="L130">            Files.createDirectories(inputDirectory);</span>
+<span class="nc" id="L131">        } catch (IOException ex) {</span>
+<span class="nc" id="L132">            throw new IllegalStateException(&quot;Unable to access input directory: &quot; + inputDirectory, ex);</span>
+<span class="fc" id="L133">        }</span>
+<span class="fc" id="L134">    }</span>
+
+    private void waitForInitialLoad(Future&lt;?&gt; pumaStartup, Future&lt;?&gt; nikeStartup) {
+        try {
+<span class="nc" id="L138">            pumaStartup.get();</span>
+<span class="nc" id="L139">            nikeStartup.get();</span>
+<span class="nc" id="L140">        } catch (Exception ex) {</span>
+<span class="nc" id="L141">            throw new IllegalStateException(&quot;Failed during initial file loading.&quot;, ex);</span>
+<span class="nc" id="L142">        }</span>
+<span class="nc" id="L143">    }</span>
+}
+
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

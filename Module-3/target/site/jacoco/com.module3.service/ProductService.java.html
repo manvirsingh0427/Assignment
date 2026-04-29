@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ProductService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">module3</a> &gt; <a href="index.source.html" class="el_package">com.module3.service</a> &gt; <span class="el_source">ProductService.java</span></div><h1>ProductService.java</h1><pre class="source lang-java linenums">package com.module3.service;
+
+import com.module3.model.FilterOption;
+import com.module3.model.Product;
+import com.module3.store.ProductRepository;
+import com.module3.validation.ProductValidator;
+
+import java.util.List;
+import java.util.stream.IntStream;
+
+public class ProductService {
+    private final ProductRepository repository;
+    private final ProductValidator validator;
+
+<span class="fc" id="L15">    public ProductService(ProductRepository repository, ProductValidator validator) {</span>
+<span class="fc" id="L16">        this.repository = repository;</span>
+<span class="fc" id="L17">        this.validator = validator;</span>
+<span class="fc" id="L18">    }</span>
+
+    public List&lt;Product&gt; search(FilterOption filterOption, String firstValue, String secondValue) {
+<span class="pc bpc" id="L21" title="3 of 6 branches missed.">        switch (filterOption) {</span>
+            case COLOR:
+<span class="nc" id="L23">                return repository.findByColor(validator.normalizeFilterValue(firstValue, &quot;COLOR&quot;));</span>
+            case SIZE:
+<span class="nc" id="L25">                return repository.findBySize(validator.normalizeSize(firstValue));</span>
+            case COLOR_AND_SIZE:
+<span class="fc" id="L27">                return repository.findByColorAndSize(</span>
+<span class="fc" id="L28">                        validator.normalizeFilterValue(firstValue, &quot;COLOR&quot;),</span>
+<span class="fc" id="L29">                        validator.normalizeSize(secondValue)</span>
+                );
+            case BRAND_AND_COLOR:
+<span class="fc" id="L32">                return repository.findByBrandAndColor(</span>
+<span class="fc" id="L33">                        validator.parseBrand(firstValue),</span>
+<span class="fc" id="L34">                        validator.normalizeFilterValue(secondValue, &quot;COLOR&quot;)</span>
+                );
+            case BRAND_AND_SIZE:
+<span class="pc" id="L37">                return repository.findByBrandAndSize(</span>
+<span class="nc" id="L38">                        validator.parseBrand(firstValue),</span>
+<span class="nc" id="L39">                        validator.normalizeSize(secondValue)</span>
+                );
+            default:
+<span class="nc" id="L42">                throw new IllegalArgumentException(&quot;Unsupported filter option selected.&quot;);</span>
+        }
+    }
+
+    public String formatResults(List&lt;Product&gt; products) {
+<span class="fc bfc" id="L47" title="All 2 branches covered.">        if (products.isEmpty()) {</span>
+<span class="fc" id="L48">            return &quot;No items found for the given filter.&quot;;</span>
+        }
+
+<span class="fc" id="L51">        StringBuilder builder = new StringBuilder();</span>
+<span class="fc" id="L52">        IntStream.range(0, products.size())</span>
+<span class="fc" id="L53">                .forEach(index -&gt; builder.append(&quot;item&quot;)</span>
+<span class="fc" id="L54">                        .append(index + 1)</span>
+<span class="fc" id="L55">                        .append(&quot; -&gt; &quot;)</span>
+<span class="fc" id="L56">                        .append(products.get(index).toDisplayString())</span>
+<span class="fc" id="L57">                        .append(System.lineSeparator()));</span>
+<span class="fc" id="L58">        return builder.toString().trim();</span>
+    }
+
+    public int totalProducts() {
+<span class="nc" id="L62">        return repository.count();</span>
+    }
+}
+
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

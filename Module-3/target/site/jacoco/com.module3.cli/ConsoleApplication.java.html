@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ConsoleApplication.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">module3</a> &gt; <a href="index.source.html" class="el_package">com.module3.cli</a> &gt; <span class="el_source">ConsoleApplication.java</span></div><h1>ConsoleApplication.java</h1><pre class="source lang-java linenums">package com.module3.cli;
+
+import com.module3.model.FilterOption;
+import com.module3.model.Product;
+import com.module3.service.FilePollingService;
+import com.module3.service.ProductService;
+
+import java.io.PrintStream;
+import java.util.List;
+import java.util.Scanner;
+
+public class ConsoleApplication {
+    private final ProductService productService;
+    private final FilePollingService filePollingService;
+    private final Scanner scanner;
+    private final PrintStream output;
+
+    public ConsoleApplication(ProductService productService,
+                              FilePollingService filePollingService,
+                              Scanner scanner,
+<span class="nc" id="L21">                              PrintStream output) {</span>
+<span class="nc" id="L22">        this.productService = productService;</span>
+<span class="nc" id="L23">        this.filePollingService = filePollingService;</span>
+<span class="nc" id="L24">        this.scanner = scanner;</span>
+<span class="nc" id="L25">        this.output = output;</span>
+<span class="nc" id="L26">    }</span>
+
+    public void start() {
+<span class="nc" id="L29">        filePollingService.start();</span>
+<span class="nc" id="L30">        output.println(&quot;Product loader started. CSV files are read from the input folder every 30 seconds.&quot;);</span>
+<span class="nc" id="L31">        output.println(&quot;Currently loaded records: &quot; + productService.totalProducts());</span>
+<span class="nc" id="L32">        output.println();</span>
+
+        while (true) {
+<span class="nc" id="L35">            printMenu();</span>
+<span class="nc bnc" id="L36" title="All 2 branches missed.">            if (!scanner.hasNextLine()) {</span>
+<span class="nc" id="L37">                output.println();</span>
+<span class="nc" id="L38">                output.println(&quot;Input stream closed. Exiting application.&quot;);</span>
+<span class="nc" id="L39">                filePollingService.stop();</span>
+<span class="nc" id="L40">                return;</span>
+            }
+<span class="nc" id="L42">            String optionValue = scanner.nextLine().trim();</span>
+
+<span class="nc bnc" id="L44" title="All 2 branches missed.">            if (&quot;exit&quot;.equalsIgnoreCase(optionValue)) {</span>
+<span class="nc" id="L45">                output.println(&quot;Exiting application. Goodbye!&quot;);</span>
+<span class="nc" id="L46">                filePollingService.stop();</span>
+<span class="nc" id="L47">                return;</span>
+            }
+
+            try {
+<span class="nc" id="L51">                FilterOption filterOption = FilterOption.fromMenuValue(optionValue);</span>
+<span class="nc" id="L52">                List&lt;Product&gt; results = processSearch(filterOption);</span>
+<span class="nc" id="L53">                output.println(productService.formatResults(results));</span>
+<span class="nc" id="L54">            } catch (IllegalArgumentException ex) {</span>
+<span class="nc" id="L55">                output.println(&quot;Error: &quot; + ex.getMessage());</span>
+<span class="nc" id="L56">            } catch (Exception ex) {</span>
+<span class="nc" id="L57">                output.println(&quot;Something went wrong while processing your request: &quot; + ex.getMessage());</span>
+<span class="nc" id="L58">            }</span>
+
+<span class="nc" id="L60">            output.println();</span>
+<span class="nc" id="L61">        }</span>
+    }
+
+    private List&lt;Product&gt; processSearch(FilterOption filterOption) {
+<span class="nc bnc" id="L65" title="All 6 branches missed.">        switch (filterOption) {</span>
+            case COLOR:
+<span class="nc" id="L67">                return productService.search(filterOption, ask(&quot;Enter COLOR&quot;), null);</span>
+            case SIZE:
+<span class="nc" id="L69">                return productService.search(filterOption, ask(&quot;Enter SIZE&quot;), null);</span>
+            case COLOR_AND_SIZE:
+<span class="nc" id="L71">                return productService.search(filterOption, ask(&quot;Enter COLOR&quot;), ask(&quot;Enter SIZE&quot;));</span>
+            case BRAND_AND_COLOR:
+<span class="nc" id="L73">                return productService.search(filterOption, ask(&quot;Enter BRAND (PUMA/NIKE)&quot;), ask(&quot;Enter COLOR&quot;));</span>
+            case BRAND_AND_SIZE:
+<span class="nc" id="L75">                return productService.search(filterOption, ask(&quot;Enter BRAND (PUMA/NIKE)&quot;), ask(&quot;Enter SIZE&quot;));</span>
+            default:
+<span class="nc" id="L77">                throw new IllegalArgumentException(&quot;Unsupported option selected.&quot;);</span>
+        }
+    }
+
+    private void printMenu() {
+<span class="nc" id="L82">        output.println(&quot;Choose a filter option or type 'exit':&quot;);</span>
+<span class="nc" id="L83">        output.println(&quot;1. COLOR&quot;);</span>
+<span class="nc" id="L84">        output.println(&quot;2. SIZE&quot;);</span>
+<span class="nc" id="L85">        output.println(&quot;3. COLOR AND SIZE&quot;);</span>
+<span class="nc" id="L86">        output.println(&quot;4. BRAND AND COLOR&quot;);</span>
+<span class="nc" id="L87">        output.println(&quot;5. BRAND AND SIZE&quot;);</span>
+<span class="nc" id="L88">        output.print(&quot;Your choice: &quot;);</span>
+<span class="nc" id="L89">    }</span>
+
+    private String ask(String label) {
+<span class="nc" id="L92">        output.print(label + &quot;: &quot;);</span>
+<span class="nc bnc" id="L93" title="All 2 branches missed.">        if (!scanner.hasNextLine()) {</span>
+<span class="nc" id="L94">            throw new IllegalArgumentException(&quot;Input was not provided. Please try again.&quot;);</span>
+        }
+<span class="nc" id="L96">        return scanner.nextLine();</span>
+    }
+}
+
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>
